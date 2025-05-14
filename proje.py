@@ -52,22 +52,19 @@ def extract_symptoms_from_summary(summary):
     print("      You need to implement extract_symptoms_from_summary to parse actual symptom text.")
 
     symptoms_list = []
-    # This placeholder logic will *not* work reliably with error messages.
-    # Replace this with actual parsing logic (e.g., using LLM call or regex)
-    # once the search is working and returning actual summary text.
+   
     if isinstance(summary, str) and "Error processing symptoms" not in summary:
-        # Dummy logic - refine this significantly
-        possible_symptom_keywords = ["anxiety", "depression", "fatigue", "pain", "insomnia", "irritability", "low mood"] # Add relevant keywords
+       
+        possible_symptom_keywords = ["anxiety", "depression", "fatigue", "pain", "insomnia", "irritability", "low mood"] 
         for keyword in possible_symptom_keywords:
             if keyword in summary.lower():
-                 # Simple heuristic, needs improvement
-                 if keyword.capitalize() not in symptoms_list: # Avoid duplicates
+                
+                 if keyword.capitalize() not in symptoms_list: 
                      symptoms_list.append(keyword.capitalize())
 
-    if not symptoms_list and isinstance(summary, str) and "Error processing symptoms" not in summary and len(summary) > 50: # Basic check if summary looks like real text
+    if not symptoms_list and isinstance(summary, str) and "Error processing symptoms" not in summary and len(summary) > 50: 
          print("Warning: Placeholder symptom extraction found no keywords. Consider improving implementation.")
-         # Optional: Add a generic symptom if you couldn't extract specific ones but got text
-         # symptoms_list = ["General well-being improvement"]
+        
 
 
     if not symptoms_list:
@@ -159,8 +156,7 @@ def write_disorder_doc(disorder, data, filename):
 
     try:
         os.makedirs("outputs", exist_ok=True)
-        safe_filename = "".join([c for c in filename if c.isalnum() or c in (' ', '-', '_', '(' , ')')]).rstrip() # Added () for names like PTSD
-        if not safe_filename:
+        safe_filename = "".join([c for c in filename if c.isalnum() or c in (' ', '-', '_', '(' , ')')]).rstrip() 
             safe_filename = "report"
         filepath = os.path.join("outputs", f"{safe_filename}.docx")
         doc.save(filepath)
@@ -204,18 +200,10 @@ async def main():
 
             print(f"Searching for: {query}")
             try:
-                # --- TEMPORARY BYPASS FOR DEBUGGING THE SEARCH ERROR ---
-                # Uncomment the line below to use the real agent search
-                # result = await agent.run(f"Search top 5 research papers for: {query}")
-
-                # Comment out the line above and uncomment the line below to use dummy data
                 print("--- Using DUMMY search result to test summarization and document writing ---")
                 result = f"DUMMY SEARCH RESULT for '{query}'. Replace this with real search results.\n\nExample research summary 1 about {topic} for {disorder}: This study found positive outcomes...\nExample research summary 2: Another paper discussed...\nSymptom keywords for {disorder}: fatigue, pain, insomnia."
                 print(f"Dummy result: {result[:200]}...")
-                # --- END TEMPORARY BYPASS ---
-
-                # Only proceed to summarize if the dummy result isn't indicating a prior error
-                # (though with dummy data, it shouldn't)
+                
                 summary = summarize_with_llm(llm, result, topic, disorder)
 
                 if topic == "therapy":
@@ -223,20 +211,15 @@ async def main():
                 else:
                     reports[disorder][topic] = summary
             except Exception as e:
-                # This block might still catch errors from the LLM call if summarize_with_llm fails
                 print(f"Error during processing {topic} for {disorder}: {type(e).__name__}: {e}")
                 reports[disorder][topic] = f"Error processing {topic}: {e}"
 
-
-        # --- Process Sports based on Extracted Symptoms ---
         print(f"\nExtracting symptoms for {disorder}...")
-        # Pass the summary content for symptoms to the extraction function
         symptoms_summary_content = reports[disorder]["symptoms"]
-        # Ensure the summary is a string before passing
         if not isinstance(symptoms_summary_content, str):
              symptoms_summary_content = str(symptoms_summary_content)
 
-        symptoms = extract_symptoms_from_summary(symptoms_summary_content) # Extract symptoms
+        symptoms = extract_symptoms_from_summary(symptoms_summary_content) 
 
         if symptoms:
             print(f"Extracted symptoms: {symptoms}")
@@ -250,17 +233,10 @@ async def main():
 
                 print(f"Searching for: {sports_query}")
                 try:
-                    # --- TEMPORARY BYPASS FOR DEBUGGING THE SEARCH ERROR ---
-                    # Uncomment the line below to use the real agent search
-                    # sports_result = await agent.run(f"Search top 5 research papers for: {sports_query}")
-
-                    # Comment out the line above and uncomment the line below to use dummy data
                     print("--- Using DUMMY search result for SPORTS to test summarization and document writing ---")
                     sports_result = f"DUMMY SEARCH RESULT for '{sports_query}'. Replace this with real search results.\n\nResearch indicates exercise is beneficial for {symptom}.\nOne paper suggests activities like swimming...\nAnother study mentions walking helps with {symptom}."
                     print(f"Dummy result: {sports_result[:200]}...")
-                    # --- END TEMPORARY BYPASS ---
-
-                    # Only proceed to summarize if the dummy result isn't indicating a prior error
+                
                     sports_summary = summarize_with_llm(llm, sports_result, "sports", disorder, symptom=symptom)
                     reports[disorder]["sports"][symptom] = sports_summary
 
@@ -271,7 +247,6 @@ async def main():
              print(f"No symptoms extracted for {disorder} or symptom extraction failed. Skipping sports section.")
 
 
-        # --- Write the report for the current disorder ---
         write_disorder_doc(disorder, reports[disorder], f"{disorder}_report")
 
 
