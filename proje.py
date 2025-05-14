@@ -6,7 +6,6 @@ from browser_use import Agent
 import asyncio
 from docx import Document
 
-# Load environment variables from .env file
 load_dotenv()
 
 print("Python version:", sys.version)
@@ -43,7 +42,6 @@ def generate_query(topic, disorder, symptom=None):
          return TOPIC_QUERIES.get(topic, '').format(disorder=disorder)
     return TOPIC_QUERIES.get(topic, '')
 
-# Function to extract symptoms (PLACEHOLDER - NEEDS IMPLEMENTATION)
 def extract_symptoms_from_summary(summary):
     print(f"--- Symptoms Summary (for Extraction) ---")
     print(summary)
@@ -193,7 +191,7 @@ async def main():
                 continue
 
             query = generate_query(topic, disorder)
-            if not query: # Skip if query generation failed for some reason
+            if not query:
                  print(f"Skipping {topic} for {disorder} due to empty query.")
                  reports[disorder][topic] = "Query could not be generated."
                  continue
